@@ -59,7 +59,7 @@ const READ_MAP: Record<string, ReadProperty> = {
   '': { key: 'source' },
   x: { key: 'x' },
   y: { key: 'y' },
-  icon: {
+  sticker: { // Directly use 'sticker' without any prefix
     key: 'icon',
     transform: extractIconFromYaml
   },
@@ -123,7 +123,7 @@ const WRITE_MAP: Record<keyof BannerData, string> = {
   source: '',
   x: 'x',
   y: 'y',
-  icon: 'icon',
+  icon: 'sticker', // Directly write to 'sticker' without prefix
   header: 'header',
   adjust_width: 'adjust_width',
   objectFit: 'object-fit',
@@ -147,12 +147,36 @@ export const extractBannerData = (
 ): BannerData => {
   return Object.entries(READ_MAP).reduce((data, [suffix, item]) => {
     const { key, transform } = item;
-    const yamlKey = getYamlKey(suffix);
-    const rawValue = frontmatter[yamlKey];
+    const yamlKey = suffix === 'sticker' ? 'sticker' : getYamlKey(suffix);
+    let rawValue = frontmatter[yamlKey];
+
+    // Automatically format the banner source if it's not in the expected format
+    if (key === 'source' && typeof rawValue === 'string') {
+      rawValue = formatBannerSource(rawValue);
+    }
+
     data[key] = transform ? transform(rawValue, file) : rawValue;
     return data;
   }, {} as Record<keyof BannerData, unknown>) as BannerData;
 };
+
+// Helper function to format the banner source
+const formatBannerSource = (value: string): string => {
+  // Check if the path is a remote URL, skip processing if it starts with http:// or https://
+  if (/^https?:\/\//i.test(value)) {
+    return value;
+  }
+
+  // Step 1: Remove any square brackets
+  let cleanedValue = value.replace(/[\[\]]/g, '');
+
+  // Step 2: Remove any quotes
+  cleanedValue = cleanedValue.replace(/^['"]+|['"]+$/g, '');
+
+  // Step 3: Wrap the cleaned value in double square brackets if not already formatted
+  return `[[${cleanedValue.trim()}]]`;
+};
+
 
 // Helper to extract banner data from a given file
 export const extractBannerDataFromFile = (file: TFile): BannerData => {
@@ -180,7 +204,7 @@ export const updateBannerData = async (file: TFile, bannerData: Partial<BannerDa
   await plug.app.fileManager.processFrontMatter(file, async (frontmatter) => {
     for (const [dataKey, val] of Object.entries(bannerData) as [keyof BannerData, any][]) {
       const suffix = WRITE_MAP[dataKey];
-      const yamlKey = getYamlKey(suffix);
+      const yamlKey = suffix === 'sticker' ? 'sticker' : getYamlKey(suffix); // Directly use 'sticker'
       frontmatter[yamlKey] = val;
     }
   });

@@ -1,4 +1,20 @@
 # Banners
+
+This is a fork of [termi's fork](https://github.com/termi/obsidian-banners) of the [Banners](https://github.com/noatpad/obsidian-banners) 
+plugin updated to work with updated obisidan versions (v1.6.7), and to share the fields from the [make.md](https://github.com/make-md/makemd) plugin.
+
+Specifically, I have modified it to read the 'banner' and 'sticker' yaml fields created by the [make.md](https://github.com/make-md/makemd) plugin, to have banners on mobile, as make.md crashes if enabled on mine.
+
+## Installation
+- **Manual install**:
+  - Go to the latest release [here](https://github.com/seanlaidlaw/obsidian-banners/releases/latest), & download the files listed there (`main.js`, `styles.css`, & `manifest.json`)
+  - Go to your vault's plugin folder (`<vault>/.obsidian/plugins`), create a folder called `obsidian-banners`, and move your files in there.
+  - Reload Obsidian & enable the plugin in Settings -> Community Plugins
+
+---
+
+## Description
+
 An [Obsidian](https://obsidian.md/) plugin to add banner images (and icons) to your notes!
 
 ![banners-demo](https://raw.githubusercontent.com/noatpad/obsidian-banners/master/images/banners.gif)
@@ -20,15 +36,15 @@ Under the hood, this plugin uses your file's YAML frontmatter/metadata to store 
 # NOTE: Make sure it's wrapped in quotes to avoid parsing errors, such as "![[file]]"
 banner: string
 
+# The banner icon. Can be an emoji (format emoji//) or any string really (but it'll only accept the first letter)
+sticker: string
+
 # The banner's center position. A number between 0-1
 banner_x: number
 banner_y: number
 
 # Determines if the banner is locked in place or not
 banner_lock: boolean
-
-# The banner icon. Can be an emoji or any string really (but it'll only accept the first letter)
-banner_icon: string
 ```
 
 ## Settings
@@ -70,41 +86,7 @@ banner_icon: string
 - **Allow mobile drag**: Choose if you can adjust the banner positioning on mobile devices by dragging.
   - ***NOTE:** This setting is experimental since it acts a bit funny with the mobile app's already built-in touch gestures.*
 
-## Compatibility
-This plugin has been tested on desktop from 0.12.12 onwards (previously MacOS and currently Windows) and on mobile from 1.0.4 onwards (iOS). It probably works fine on older versions, but just a heads up.
-
-## Installation
-- **From the Community Plugins tab**:
-	- Within Obsidian, search for Banners in the Community Plugins browser and install it directly
-- **Manual install**:
-  - Go to the latest release [here](https://github.com/noatpad/obsidian-banners/releases/latest), & download the files listed there (`main.js`, `styles.css`, & `manifest.json`)
-  - Go to your vault's plugin folder (`<vault>/.obsidian/plugins`), create a folder called `obsidian-banners`, and move your files in there.
-  - Reload Obsidian & enable the plugin in Settings -> Community Plugins
-
-## FAQ
-#### What are these `banner`, `banner_x`, `banner_y`, ... fields in my note's frontmatter?
-This plugin uses the frontmatter to store data about your note's banner, such as its positioning and such. The fields you can use are listed [here](https://github.com/noatpad/obsidian-banners#advanced) and the prefix can be customized using the **Frontmatter field name** setting.
-
-#### Is this incompatible with other plugins?
-There are a few cases, but it depends. Because of how it functions, any plugin that conflicts with Banners' styling may cause issues. It's rather situational, but I'm planning to address some styling fixes for those conflicts down the line.
-
-Currently some plugins reported to conflict with Banners are:
-- [ ] [Breadcrumbs](https://github.com/SkepticMystic/breadcrumbs)
-- [x] [Obsidian Code Block Copy](https://github.com/jdbrice/obsidian-code-block-copy)
-  - *Newer versions of Obsidian have this built-in and without issue*
-- [ ] [Obsidian Code Block Enhancer](https://github.com/nyable/obsidian-code-block-enhancer)
-- [ ] [Obsidian Embedded Note Titles](https://github.com/mgmeyers/obsidian-embedded-note-titles)
-
 ## Develop
 Once you run `npm i`, you can build the files into `dist/` easily by running `npm run build`.
 
 You can also have it watch your files and update your plugin within your vault while you develop by running `npm run dev`. Just make sure to set `DEVDIR` in `./esbuild.config.mjs` to your testing vault beforehand.
-## Things I *might* do down the road
-- [ ] Plugin compatibility fixes and enhancements
-- [ ] Note-specific settings (override global style & height settings per note)
-  - [ ] Drag bottom of banner to determine note-specific banner height
-- [ ] Image icons instead of only emoji
-- [ ] Banner titles (a la Notion-style)
-- [ ] Allow content's vertical displacement height to be different than banner height (this can be nice for aesthetic choices with the *Gradient* style)
-- [ ] Copy image files and paste as a banner
-- [ ] Unsplash API integration (select from Unsplash's images straight from Obsidian)
