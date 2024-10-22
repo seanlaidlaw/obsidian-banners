@@ -15,7 +15,9 @@ export const loadExtensions = () => {
 
   // Properly insert a banner upon loading the banner
   iterateMarkdownLeaves((leaf) => {
-    leaf.view.editor.cm.dispatch({ effects: openNoteEffect.of(null) });
+    if (leaf.view.editor && leaf.view.editor.cm) {
+      leaf.view.editor.cm.dispatch({ effects: openNoteEffect.of(null) });
+    }
   }, 'editing');
 };
 
@@ -27,7 +29,9 @@ export const registerEditorBannerEvents = () => {
     'defaultHeaderValue'
   ], () => {
     iterateMarkdownLeaves((leaf) => {
-      leaf.view.editor.cm.dispatch({ effects: refreshEffect.of(null) });
+      if (leaf.view.editor && leaf.view.editor.cm) {
+        leaf.view.editor.cm.dispatch({ effects: refreshEffect.of(null) });
+      }
     }, 'editing');
   });
 
@@ -39,10 +43,12 @@ export const registerEditorBannerEvents = () => {
         const { id, view } = leaf;
         if (doesLeafHaveMarkdownMode(leaf)) {
           const { mode } = (leaf.getViewState() as MarkdownViewState).state;
-          const effects = mode === 'source'
-            ? openNoteEffect.of(null)
-            : removeBannerEffect.of(null);
-          view.editor.cm.dispatch({ effects });
+          if (view.editor && view.editor.cm) {
+            const effects = mode === 'source'
+              ? openNoteEffect.of(null)
+              : removeBannerEffect.of(null);
+            view.editor.cm.dispatch({ effects });
+          }
         } else if (leafBannerMap[id]) {
           // When switching to a view where the editor isn't available, remove the banner manually
           destroyBanner(id);
