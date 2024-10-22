@@ -9,7 +9,8 @@ type StringProperty = string | null | undefined;
 /* NOTE: There is a new regex known as /\p{RGI_Emoji}/v that can do emojis that are made of more
 than one emoji, but the `v` flag is not yet compatible */
 const EMOJI_REGEX = /[\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{1F9B0}-\u{1F9B3}]+/gu;
-const EMOJI_CODE_REGEX = /^emoji\/\/([a-fA-F0-9]+)$/;  // regex to detect the Make.md "emoji//1f931" pattern
+// regex to detect the Make.md "emoji//1f931" pattern
+const EMOJI_CODE_REGEX = /^emoji\/\/([a-fA-F0-9]+)/;
 const HEADER_KEY_REGEX = /{{(.+?)}}/g;
 
 export const extractIconFromYaml = (value: StringProperty): IconString | undefined => {
