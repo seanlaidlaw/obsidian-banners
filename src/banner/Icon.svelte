@@ -1,42 +1,63 @@
 <script lang="ts">
   /* eslint-disable-next-line import/default, import/no-named-as-default,
   import/no-named-as-default-member */
-  import twemoji from '@twemoji/api';
-  import { createEventDispatcher } from 'svelte';
-  import type { IconString } from 'src/bannerData';
-  import { settings } from 'src/settings/store';
+  import { onMount } from "svelte";
+  import { setIcon } from "obsidian";
+  import twemoji from "@twemoji/api";
+  import { createEventDispatcher } from "svelte";
+  import type { IconString } from "src/bannerData";
+  import { settings } from "src/settings/store";
 
   const dispatch = createEventDispatcher();
 
   export let icon: IconString;
   export let isEmbed: boolean;
 
+  let iconElement: HTMLElement;
+
   const handleIconClick = () => {
     if (isEmbed) return;
-    dispatch('open-icon-modal');
+    dispatch("open-icon-modal");
   };
 
   $: ({ headerDecor: decor, useTwemoji } = $settings);
   $: ({ type, value } = icon);
-  $: html = (type === 'emoji' && useTwemoji)
-    ? twemoji.parse(value, { className: 'banner-emoji' })
-    : value;
+
+  $: if (iconElement) {
+    if (type === "lucide") {
+      setIcon(iconElement, value);
+    } else {
+      iconElement.innerHTML =
+        type === "emoji" && useTwemoji
+          ? twemoji.parse(value, { className: "banner-emoji" })
+          : value;
+    }
+  }
+
+  onMount(() => {
+    if (type === "lucide") {
+      setIcon(iconElement, value);
+    }
+  });
 </script>
 
 <div
+  bind:this={iconElement}
   class="banner-icon"
   class:embed={isEmbed}
-  class:text-icon={type === 'text'}
-  class:emoji-icon={type === 'emoji'}
-  class:shadow={decor === 'shadow'}
-  class:border={decor === 'border'}
+  class:text-icon={type === "text"}
+  class:emoji-icon={type === "emoji"}
+  class:lucide-icon={type === "lucide"}
+  class:shadow={decor === "shadow"}
+  class:border={decor === "border"}
   role="button"
   tabindex="-1"
   on:click={handleIconClick}
-  on:keydown={(e) => e.code === 'Enter' && handleIconClick()}
+  on:keydown={(e) => e.code === "Enter" && handleIconClick()}
 >
-  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-  {@html html}
+  {#if type !== "lucide"}
+    <!-- content will be set by the reactive statement -->
+  {/if}
 </div>
 
 <style lang="scss">
@@ -52,7 +73,9 @@
 
     &:not(.embed) {
       cursor: pointer;
-      &:hover { background: #aaa4; }
+      &:hover {
+        background: #aaa4;
+      }
     }
 
     &.emoji-icon {
@@ -68,6 +91,11 @@
     }
 
     :global(img.banner-emoji) {
+      height: 1em;
+      width: 1em;
+    }
+
+    &.lucide-icon :global(svg) {
       height: 1em;
       width: 1em;
     }

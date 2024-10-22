@@ -11,6 +11,10 @@ than one emoji, but the `v` flag is not yet compatible */
 const EMOJI_REGEX = /[\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{1F9B0}-\u{1F9B3}]+/gu;
 // regex to detect the Make.md "emoji//1f931" pattern
 const EMOJI_CODE_REGEX = /^emoji\/\/([a-fA-F0-9]+)/;
+
+// Detects 'lucide//' prefixed values followed by word characters
+const LUCIDE_CODE_REGEX = /^lucide\/\/(\w+)/;
+
 const HEADER_KEY_REGEX = /{{(.+?)}}/g;
 
 export const extractIconFromYaml = (value: StringProperty): IconString | undefined => {
@@ -26,6 +30,13 @@ export const extractIconFromYaml = (value: StringProperty): IconString | undefin
       console.error(`Invalid emoji code: ${emojiCode}`);
       return undefined;
     }
+  }
+
+  // Check for Lucide Icon
+  const lucideCodeMatch = value.match(LUCIDE_CODE_REGEX);
+  if (lucideCodeMatch && lucideCodeMatch[1]) {
+    const lucideIconName = lucideCodeMatch[1];
+    return { type: 'lucide', value: lucideIconName };
   }
 
   const match = value.match(EMOJI_REGEX);
