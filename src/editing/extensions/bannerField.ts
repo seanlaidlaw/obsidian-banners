@@ -23,7 +23,9 @@ const upsertBannerFromState = (state: EditorState, bannerData: BannerData) => {
   if (hasBanner(leaf.id)) {
     updateBanner(props, leaf.id);
   } else {
-    const el = dom.querySelector<HTMLElement>(`.${SCROLLER_CLASS}`)!;
+    // Attach the banner to the scroller so it scrolls with the document.
+    // Width / padding adjustments are handled via CSS in `Banner.svelte`.
+    const el = dom.querySelector<HTMLElement>(`.${SCROLLER_CLASS}`) ?? dom;
     createBanner(props, el, leaf.id);
   }
 };

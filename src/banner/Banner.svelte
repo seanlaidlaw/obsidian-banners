@@ -80,17 +80,21 @@
 </header>
 
 <style lang="scss">
-  // NOTE: This styling rule here may cause side effects to the editing view. Let's hope it doesn't
-  /* BUG: On mobile, there is a horizontal scrolling issue where a small empty space can be
-  scrolled on the right. Unsure if this is due to this or the banner's size */
+  // Stack the banner and editor content vertically within the scroll area.
   :global(.cm-scroller) { flex-direction: column; }
 
   // Parent banner wrapper styling
   :global(.obsidian-banner-wrapper) { position: relative; }
   :global(.obsidian-banner-wrapper.with-banner:not(.in-internal-embed)) {
-    width: calc(100% + 2 * var(--file-margins));
+    width: 100% !important;
     margin: calc(-1 * var(--file-margins));
     margin-bottom: var(--file-margins);
+  }
+  // In editing mode, ensure the banner wrapper stretches full width of cm-scroller
+  :global(.cm-scroller .obsidian-banner-wrapper.with-banner:not(.in-internal-embed)) {
+    width: 100% !important;
+    margin-left: 0;
+    margin-right: 0;
   }
   :global(.is-mobile .obsidian-banner-wrapper.with-banner:not(.in-internal-embed)) {
     width: calc(100% + 2 * var(--size-4-5));

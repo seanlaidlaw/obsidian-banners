@@ -16,15 +16,19 @@ import { iterateMarkdownLeaves, registerSettingChangeEvent } from 'src/utils';
 Reload app or manually edit the view/contents to fix */
 const rerender = () => {
   for (const leaf of plug.app.workspace.getLeavesOfType('markdown')) {
-    const { previewMode } = leaf.view;
-    const sections = previewMode.renderer.sections.filter((s) => (
+    const view: any = leaf.view;
+    const mode = view?.previewMode ?? view?.currentMode;
+    const renderer = mode?.renderer;
+    if (!renderer) continue;
+
+    const sections = renderer.sections.filter((s: any) => (
       s.el.querySelector('pre.frontmatter, .internal-embed')
     ));
     for (const section of sections) {
       section.rendered = false;
       section.html = '';
     }
-    previewMode.renderer.queueRender();
+    renderer.queueRender();
   }
 };
 
@@ -32,6 +36,34 @@ const isEmbedded = (containerEl: HTMLElement): Embedded => {
   if (containerEl.closest('.internal-embed')) return 'internal';
   if (containerEl.closest('.popover')) return 'popover';
   return false;
+};
+
+// Obsidian 1.11.x changed the reading view layout so that the element which
+// receives the postprocessor callback is now inside a max-width container.
+// If we attach the banner wrapper to that inner container, the banner is
+// constrained to the readable line width instead of stretching across the
+// whole pane. To restore the old, pane-wide banner behaviour, we try to
+// attach the banner wrapper to a higher-level container that is not
+// max-width constrained.
+const getBannerContainer = (containerEl: HTMLElement): HTMLElement => {
+  // Prefer the scrolling preview view so the banner scrolls with the note content.
+  // In Obsidian 1.11.x, `.markdown-reading-view` can be a non-scrolling wrapper
+  // around the actual scrolling `.markdown-preview-view`.
+  const previewView =
+    containerEl.closest<HTMLElement>('.markdown-preview-view') ??
+    containerEl.querySelector<HTMLElement>('.markdown-preview-view');
+  if (previewView instanceof HTMLElement) return previewView;
+
+  // Prefer the markdown reading view element when available
+  const readingView = containerEl.closest('.markdown-reading-view');
+  if (readingView instanceof HTMLElement) return readingView;
+
+  // Fallback to the generic view content wrapper (works in some layouts)
+  const viewContent = containerEl.closest('.view-content');
+  if (viewContent instanceof HTMLElement) return viewContent;
+
+  // Old behaviour: use the immediate parent, or the element itself as a last resort
+  return containerEl.parentElement ?? containerEl;
 };
 
 const postprocessor: MarkdownPostProcessor = (el, ctx) => {
@@ -62,7 +94,8 @@ const postprocessor: MarkdownPostProcessor = (el, ctx) => {
     if (hasBanner(docId)) {
       updateBanner(props, docId);
     } else {
-      createBanner(props, containerEl.parentElement!, docId);
+      const bannerContainer = getBannerContainer(containerEl);
+      createBanner(props, bannerContainer, docId);
     }
   } else {
     destroyBanner(docId);
@@ -88,7 +121,8 @@ export const registerReadingBannerEvents = () => {
     iterateMarkdownLeaves((leaf) => {
       if (leaf.view && leaf.view.file && leaf.view.file.stat) {
         if (!leaf.view.file.stat.size) {
-          const docId = leaf.view.previewMode?.docId;
+          const view: any = leaf.view;
+          const docId = view.previewMode?.docId ?? view.currentMode?.docId;
           if (docId) {
             destroyBanner(docId);
           }

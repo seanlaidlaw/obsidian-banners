@@ -106,6 +106,7 @@
     max-width: none;
     object-fit: cover;
     user-select: none;
+    border-radius: 0 !important;
 
     :global(.obsidian-banner-wrapper) & { height: var(--banners-height); }
     :global(.is-mobile .obsidian-banner-wrapper) & { height: var(--banners-mobile-height); }
